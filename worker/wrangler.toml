@@ -1,0 +1,10 @@
+name = "print-release-r2-bucket-worker"
+main = "src/index.ts"
+compatibility_date = "2023-10-16"
+
+account_id = "e29f1718177589c94510db0553fe0024"
+
+r2_buckets = [{ binding = "PRINT_FILES", bucket_name = "print-release-files" }]
+
+[observability]
+enabled = true
