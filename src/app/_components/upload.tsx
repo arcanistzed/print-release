@@ -1,5 +1,7 @@
 "use client";
 
+import * as pdfjsLib from "pdfjs-dist";
+
 import { api } from "~/trpc/react";
 
 const Upload = () => {
@@ -24,11 +26,17 @@ const Upload = () => {
 			return;
 		}
 
+		// Count the number of pages in the PDF
+		const data = await file.arrayBuffer();
+		const pdf = await pdfjsLib.getDocument(data).promise;
+		const pages = pdf.numPages;
+
 		// Create the job
 		let job;
 		try {
 			job = await createJob.mutateAsync({
 				name: file.name,
+				pages,
 				copies,
 				duplex,
 				bw,
@@ -50,7 +58,7 @@ const Upload = () => {
 
 		// Upload the file to S3
 		try {
-			const presignedUrl = await uploadUrl.mutateAsync(`${job.id}-${file.name}.${file.type}`);
+			const presignedUrl = await uploadUrl.mutateAsync(job.id);
 			if (!presignedUrl) {
 				console.error("Failed to fetch the presigned URL.");
 				return;
