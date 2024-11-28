@@ -1,28 +1,10 @@
 import ipp, { type PrintJobRequest } from "ipp";
 import { z } from "zod";
-import { env } from "~/env";
-
-const printer = new ipp.Printer("http://localhost:631/printers/XP-320");
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { generatePresignedUrl } from "~/server/utils";
 
-const generatePresignedUrl = async (id: string, method: "GET" | "PUT") => {
-	const url = new URL(env.S3_URL);
-	url.searchParams.set("id", id);
-	const response = await fetch(url.toString(), {
-		method,
-		headers: {
-			Authorization: `Bearer ${env.S3_AUTH_KEY}`,
-		},
-	});
-
-	if (!response.ok) {
-		console.error("Failed to generate presigned URL for S3:", response.statusText);
-		return;
-	}
-
-	return response.text();
-};
+const printer = new ipp.Printer("http://localhost:631/printers/XP-320");
 
 export const printRouter = createTRPCRouter({
 	getUploadUrl: protectedProcedure.input(z.string()).mutation(async ({ input }) => {
